@@ -18,8 +18,6 @@
 
 2. Клонируйте репозиторий.
 3. ```bash
-   git clone https://github.com/yourusername/vue-post-manager.git
-   cd vue-post-manager
    npm install
    npm run serve
 ## Автор 
