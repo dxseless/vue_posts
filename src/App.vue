@@ -53,7 +53,7 @@ export default {
           id: 1,
           title: "Post about Vue.js",
           content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores consequatur culpa nihil laborum quo nam reiciendis beatae veniam quibusdam magni. Similique distinctio ducimus repellat iusto mollitia iure corrupti, sint minima!",
+            "Vue.js is a progressive JavaScript framework that is approachable, versatile, and performant. It allows developers to build user interfaces and single-page applications with ease. Vue's reactivity system and component-based architecture make it a joy to work with.",
           likes: 0,
           isEditing: false,
         },
