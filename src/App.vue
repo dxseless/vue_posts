@@ -1,81 +1,23 @@
 <template>
   <div class="post-container">
-    <div class="controls">
-      <input
-        v-model="searchQuery"
-        placeholder="Search posts..."
-        class="search-input"
-      />
-      <button @click="toggleSort" class="sort-button">
-        {{ sortByLikes ? "Sort by Date" : "Sort by Likes" }}
-      </button>
-      <button @click="toggleTheme" class="theme-button">
-        {{ isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode" }}
-      </button>
-    </div>
+    <Controls
+      :searchQuery="searchQuery"
+      :sortByLikes="sortByLikes"
+      :isDarkMode="isDarkMode"
+      @update:searchQuery="searchQuery = $event"
+      @toggleSort="toggleSort"
+      @toggleTheme="toggleTheme"
+    />
 
-    <div class="add-post">
-      <input
-        v-model="newPost.title"
-        placeholder="Post title"
-        class="input-field"
-      />
-      <textarea
-        v-model="newPost.content"
-        placeholder="Post content"
-        class="input-field"
-      ></textarea>
-      <input
-        v-model="newPost.tags"
-        placeholder="Tags (comma separated)"
-        class="input-field"
-      />
-      <button @click="addPost" class="add-button">Add Post</button>
-    </div>
+    <AddPost @addPost="addPost" />
 
-    <transition-group name="fade" tag="div">
-      <div class="post" v-for="post in paginatedPosts" :key="post.id">
-        <div class="post-header">
-          <input
-            v-if="post.isEditing"
-            v-model="post.title"
-            class="edit-input"
-          />
-          <strong v-else>Name of the post:</strong>
-          <span
-            v-if="!post.isEditing"
-            class="post-title"
-            v-html="post.highlightedTitle"
-          ></span>
-        </div>
-        <div class="post-content">
-          <strong>Article:</strong>
-          <textarea
-            v-if="post.isEditing"
-            v-model="post.content"
-            class="edit-textarea"
-          ></textarea>
-          <p v-else class="post-text" v-html="post.highlightedContent"></p>
-        </div>
-        <div class="tags">
-          <span v-for="tag in post.tags" :key="tag" class="tag">{{ tag }}</span>
-        </div>
-        <div class="post-footer">
-          <button class="like-button" @click="addLike(post.id)">
-            ❤️ Like ({{ post.likes }})
-          </button>
-          <button class="favorite-button" @click="toggleFavorite(post.id)">
-            {{ post.isFavorite ? "★ Unfavorite" : "☆ Favorite" }}
-          </button>
-          <button class="edit-button" @click="toggleEdit(post.id)">
-            {{ post.isEditing ? "Save" : "Edit" }}
-          </button>
-          <button class="delete-button" @click="deletePost(post.id)">
-            🗑️ Delete
-          </button>
-        </div>
-      </div>
-    </transition-group>
+    <PostList
+      :posts="paginatedPosts"
+      @addLike="addLike"
+      @toggleFavorite="toggleFavorite"
+      @toggleEdit="toggleEdit"
+      @deletePost="deletePost"
+    />
 
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">← Назад</button>
@@ -90,7 +32,12 @@
 </template>
 
 <script>
+import Controls from "./components/Controls.vue";
+import AddPost from "./components/AddPost.vue";
+import PostList from "./components/PostList.vue";
+
 export default {
+  components: { Controls, AddPost, PostList },
   data() {
     return {
       posts: [
@@ -141,7 +88,6 @@ export default {
       isDarkMode: true,
     };
   },
-
   computed: {
     filteredPosts() {
       let posts = this.posts.filter(
@@ -161,79 +107,54 @@ export default {
 
       return posts;
     },
-
     paginatedPosts() {
       const start = (this.currentPage - 1) * this.postsPerPage;
       const end = start + this.postsPerPage;
-      return this.highlightedPosts.slice(start, end);
+      return this.filteredPosts.slice(start, end);
     },
-
     totalPages() {
       return Math.ceil(this.filteredPosts.length / this.postsPerPage);
     },
-
-    highlightedPosts() {
-      return this.filteredPosts.map((post) => {
-        const regex = new RegExp(`(${this.searchQuery})`, "gi");
-        return {
-          ...post,
-          highlightedTitle: post.title.replace(regex, "<mark>$1</mark>"),
-          highlightedContent: post.content.replace(regex, "<mark>$1</mark>"),
-        };
-      });
-    },
   },
-
   methods: {
     addLike(postId) {
       const post = this.posts.find((p) => p.id === postId);
       if (post) post.likes++;
     },
-
     toggleEdit(postId) {
       const post = this.posts.find((p) => p.id === postId);
       if (post) post.isEditing = !post.isEditing;
     },
-
     deletePost(postId) {
       this.posts = this.posts.filter((post) => post.id !== postId);
     },
-
-    addPost() {
-      if (this.newPost.title.trim() && this.newPost.content.trim()) {
+    addPost(newPost) {
+      if (newPost.title.trim() && newPost.content.trim()) {
         this.posts.push({
           id: this.nextPostId++,
-          title: this.newPost.title,
-          content: this.newPost.content,
+          title: newPost.title,
+          content: newPost.content,
           likes: 0,
           isEditing: false,
           isFavorite: false,
           createdAt: new Date(),
-          tags: this.newPost.tags.split(",").map((tag) => tag.trim()),
+          tags: newPost.tags.split(",").map((tag) => tag.trim()),
         });
-        this.newPost.title = "";
-        this.newPost.content = "";
-        this.newPost.tags = "";
       }
     },
-
     toggleFavorite(postId) {
       const post = this.posts.find((p) => p.id === postId);
       if (post) post.isFavorite = !post.isFavorite;
     },
-
     toggleSort() {
       this.sortByLikes = !this.sortByLikes;
     },
-
     nextPage() {
       if (this.currentPage < this.totalPages) this.currentPage++;
     },
-
     prevPage() {
       if (this.currentPage > 1) this.currentPage--;
     },
-
     toggleTheme() {
       this.isDarkMode = !this.isDarkMode;
       document.body.classList.toggle("light-mode", !this.isDarkMode);
