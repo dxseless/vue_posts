@@ -9,6 +9,9 @@
       <button @click="toggleSort" class="sort-button">
         {{ sortByLikes ? "Sort by Date" : "Sort by Likes" }}
       </button>
+      <button @click="toggleTheme" class="theme-button">
+        {{ isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode" }}
+      </button>
     </div>
 
     <div class="add-post">
@@ -22,38 +25,66 @@
         placeholder="Post content"
         class="input-field"
       ></textarea>
+      <input
+        v-model="newPost.tags"
+        placeholder="Tags (comma separated)"
+        class="input-field"
+      />
       <button @click="addPost" class="add-button">Add Post</button>
     </div>
 
-    <div class="post" v-for="post in filteredPosts" :key="post.id">
-      <div class="post-header">
-        <input v-if="post.isEditing" v-model="post.title" class="edit-input" />
-        <strong v-else>Name of the post:</strong>
-        <span v-if="!post.isEditing" class="post-title">{{ post.title }}</span>
+    <transition-group name="fade" tag="div">
+      <div class="post" v-for="post in paginatedPosts" :key="post.id">
+        <div class="post-header">
+          <input
+            v-if="post.isEditing"
+            v-model="post.title"
+            class="edit-input"
+          />
+          <strong v-else>Name of the post:</strong>
+          <span
+            v-if="!post.isEditing"
+            class="post-title"
+            v-html="post.highlightedTitle"
+          ></span>
+        </div>
+        <div class="post-content">
+          <strong>Article:</strong>
+          <textarea
+            v-if="post.isEditing"
+            v-model="post.content"
+            class="edit-textarea"
+          ></textarea>
+          <p v-else class="post-text" v-html="post.highlightedContent"></p>
+        </div>
+        <div class="tags">
+          <span v-for="tag in post.tags" :key="tag" class="tag">{{ tag }}</span>
+        </div>
+        <div class="post-footer">
+          <button class="like-button" @click="addLike(post.id)">
+            ❤️ Like ({{ post.likes }})
+          </button>
+          <button class="favorite-button" @click="toggleFavorite(post.id)">
+            {{ post.isFavorite ? "★ Unfavorite" : "☆ Favorite" }}
+          </button>
+          <button class="edit-button" @click="toggleEdit(post.id)">
+            {{ post.isEditing ? "Save" : "Edit" }}
+          </button>
+          <button class="delete-button" @click="deletePost(post.id)">
+            🗑️ Delete
+          </button>
+        </div>
       </div>
-      <div class="post-content">
-        <strong>Article:</strong>
-        <textarea
-          v-if="post.isEditing"
-          v-model="post.content"
-          class="edit-textarea"
-        ></textarea>
-        <p v-else class="post-text">{{ post.content }}</p>
-      </div>
-      <div class="post-footer">
-        <button class="like-button" @click="addLike(post.id)">
-          ❤️ Like ({{ post.likes }})
-        </button>
-        <button class="favorite-button" @click="toggleFavorite(post.id)">
-          {{ post.isFavorite ? "★ Unfavorite" : "☆ Favorite" }}
-        </button>
-        <button class="edit-button" @click="toggleEdit(post.id)">
-          {{ post.isEditing ? "Save" : "Edit" }}
-        </button>
-        <button class="delete-button" @click="deletePost(post.id)">
-          🗑️ Delete
-        </button>
-      </div>
+    </transition-group>
+
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">← Назад</button>
+      <span class="paginate-counter"
+        >Страница {{ currentPage }} из {{ totalPages }}</span
+      >
+      <button @click="nextPage" :disabled="currentPage === totalPages">
+        Вперед →
+      </button>
     </div>
   </div>
 </template>
@@ -72,6 +103,7 @@ export default {
           isEditing: false,
           isFavorite: false,
           createdAt: new Date(),
+          tags: ["Vue", "Frontend"],
         },
         {
           id: 2,
@@ -82,6 +114,7 @@ export default {
           isEditing: false,
           isFavorite: false,
           createdAt: new Date(),
+          tags: ["JavaScript", "Web"],
         },
         {
           id: 3,
@@ -92,15 +125,20 @@ export default {
           isEditing: false,
           isFavorite: false,
           createdAt: new Date(),
+          tags: ["Web", "Trends"],
         },
       ],
       newPost: {
         title: "",
         content: "",
+        tags: "",
       },
       nextPostId: 4,
       searchQuery: "",
       sortByLikes: false,
+      currentPage: 1,
+      postsPerPage: 5,
+      isDarkMode: true,
     };
   },
 
@@ -109,7 +147,10 @@ export default {
       let posts = this.posts.filter(
         (post) =>
           post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          post.content.toLowerCase().includes(this.searchQuery.toLowerCase())
+          post.content.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          post.tags.some((tag) =>
+            tag.toLowerCase().includes(this.searchQuery.toLowerCase())
+          )
       );
 
       if (this.sortByLikes) {
@@ -119,6 +160,27 @@ export default {
       }
 
       return posts;
+    },
+
+    paginatedPosts() {
+      const start = (this.currentPage - 1) * this.postsPerPage;
+      const end = start + this.postsPerPage;
+      return this.filteredPosts.slice(start, end);
+    },
+
+    totalPages() {
+      return Math.ceil(this.filteredPosts.length / this.postsPerPage);
+    },
+
+    highlightedPosts() {
+      return this.filteredPosts.map((post) => {
+        const regex = new RegExp(`(${this.searchQuery})`, "gi");
+        return {
+          ...post,
+          highlightedTitle: post.title.replace(regex, "<mark>$1</mark>"),
+          highlightedContent: post.content.replace(regex, "<mark>$1</mark>"),
+        };
+      });
     },
   },
 
@@ -147,9 +209,11 @@ export default {
           isEditing: false,
           isFavorite: false,
           createdAt: new Date(),
+          tags: this.newPost.tags.split(",").map((tag) => tag.trim()),
         });
         this.newPost.title = "";
         this.newPost.content = "";
+        this.newPost.tags = "";
       }
     },
 
@@ -160,6 +224,19 @@ export default {
 
     toggleSort() {
       this.sortByLikes = !this.sortByLikes;
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
+
+    prevPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+
+    toggleTheme() {
+      this.isDarkMode = !this.isDarkMode;
+      document.body.classList.toggle("light-mode", !this.isDarkMode);
     },
   },
 };
@@ -176,6 +253,17 @@ body {
   background-color: #0a0a0a;
   color: #e0e0e0;
   font-family: "Arial", sans-serif;
+}
+
+body.light-mode {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+body.light-mode .post {
+  background-color: #fff;
+  color: #333;
+  border-color: #ddd;
 }
 
 .post-container {
@@ -211,7 +299,8 @@ body {
   border-color: #bb86fc;
 }
 
-.sort-button {
+.sort-button,
+.theme-button {
   background-color: #03dac6;
   color: black;
   border: none;
@@ -224,12 +313,14 @@ body {
   box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
 }
 
-.sort-button:hover {
+.sort-button:hover,
+.theme-button:hover {
   background-color: #00c4b4;
   box-shadow: 0 0 15px rgba(0, 196, 180, 0.8);
 }
 
-.sort-button:active {
+.sort-button:active,
+.theme-button:active {
   background-color: #00a896;
   transform: scale(0.95);
 }
@@ -320,6 +411,23 @@ body {
   line-height: 1.6;
   color: #e0e0e0;
   margin-top: 10px;
+}
+
+.tags {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.tag {
+  background-color: #6200ea;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin-bottom: 15px;
+  font-weight: bold;
+  font-size: 0.8em;
 }
 
 .post-footer {
@@ -420,5 +528,58 @@ body {
 .edit-textarea:focus {
   outline: none;
   border-color: #bb86fc;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #03dac6;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+}
+
+.pagination button:hover {
+  background-color: #00c4b4;
+  box-shadow: 0 0 15px rgba(0, 196, 180, 0.8);
+}
+
+.pagination button:active {
+  background-color: #00a896;
+  transform: scale(0.95);
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.paginate-counter {
+  padding: 8px 15px;
+  border: 3px solid #af10e4;
+  border-radius: 8px;
+  font-weight: bold;
 }
 </style>
