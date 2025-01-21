@@ -1,5 +1,16 @@
 <template>
   <div class="post-container">
+    <div class="controls">
+      <input
+        v-model="searchQuery"
+        placeholder="Search posts..."
+        class="search-input"
+      />
+      <button @click="toggleSort" class="sort-button">
+        {{ sortByLikes ? "Sort by Date" : "Sort by Likes" }}
+      </button>
+    </div>
+
     <div class="add-post">
       <input
         v-model="newPost.title"
@@ -14,7 +25,7 @@
       <button @click="addPost" class="add-button">Add Post</button>
     </div>
 
-    <div class="post" v-for="(post, index) in posts" :key="post.id">
+    <div class="post" v-for="post in filteredPosts" :key="post.id">
       <div class="post-header">
         <input v-if="post.isEditing" v-model="post.title" class="edit-input" />
         <strong v-else>Name of the post:</strong>
@@ -30,13 +41,16 @@
         <p v-else class="post-text">{{ post.content }}</p>
       </div>
       <div class="post-footer">
-        <button class="like-button" @click="addLike(index)">
+        <button class="like-button" @click="addLike(post.id)">
           ❤️ Like ({{ post.likes }})
         </button>
-        <button class="edit-button" @click="toggleEdit(index)">
+        <button class="favorite-button" @click="toggleFavorite(post.id)">
+          {{ post.isFavorite ? "★ Unfavorite" : "☆ Favorite" }}
+        </button>
+        <button class="edit-button" @click="toggleEdit(post.id)">
           {{ post.isEditing ? "Save" : "Edit" }}
         </button>
-        <button class="delete-button" @click="deletePost(index)">
+        <button class="delete-button" @click="deletePost(post.id)">
           🗑️ Delete
         </button>
       </div>
@@ -51,27 +65,33 @@ export default {
       posts: [
         {
           id: 1,
-          title: "Post about Vue.js",
+          title: "Why Vue.js is Awesome",
           content:
             "Vue.js is a progressive JavaScript framework that is approachable, versatile, and performant. It allows developers to build user interfaces and single-page applications with ease. Vue's reactivity system and component-based architecture make it a joy to work with.",
           likes: 0,
           isEditing: false,
+          isFavorite: false,
+          createdAt: new Date(),
         },
         {
           id: 2,
-          title: "Post about JavaScript",
+          title: "JavaScript: The Language of the Web",
           content:
-            "JavaScript is a powerful programming language that enables interactive web pages. It is widely used for front-end and back-end development.",
+            "JavaScript is the backbone of modern web development. It enables interactive web pages and is used for both front-end and back-end development. With the rise of frameworks like Vue, React, and Angular, JavaScript has become even more powerful.",
           likes: 0,
           isEditing: false,
+          isFavorite: false,
+          createdAt: new Date(),
         },
         {
           id: 3,
-          title: "Post about Web Development",
+          title: "Web Development in 2023",
           content:
-            "Web development involves building and maintaining websites. It includes front-end (client-side) and back-end (server-side) development.",
+            "Web development continues to evolve rapidly. Trends like serverless architecture, Jamstack, and progressive web apps (PWAs) are shaping the future. Frameworks like Vue.js make it easier than ever to build modern, scalable applications.",
           likes: 0,
           isEditing: false,
+          isFavorite: false,
+          createdAt: new Date(),
         },
       ],
       newPost: {
@@ -79,20 +99,42 @@ export default {
         content: "",
       },
       nextPostId: 4,
+      searchQuery: "",
+      sortByLikes: false,
     };
   },
 
+  computed: {
+    filteredPosts() {
+      let posts = this.posts.filter(
+        (post) =>
+          post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          post.content.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+
+      if (this.sortByLikes) {
+        posts.sort((a, b) => b.likes - a.likes);
+      } else {
+        posts.sort((a, b) => b.createdAt - a.createdAt);
+      }
+
+      return posts;
+    },
+  },
+
   methods: {
-    addLike(index) {
-      this.posts[index].likes++;
+    addLike(postId) {
+      const post = this.posts.find((p) => p.id === postId);
+      if (post) post.likes++;
     },
 
-    toggleEdit(index) {
-      this.posts[index].isEditing = !this.posts[index].isEditing;
+    toggleEdit(postId) {
+      const post = this.posts.find((p) => p.id === postId);
+      if (post) post.isEditing = !post.isEditing;
     },
 
-    deletePost(index) {
-      this.posts.splice(index, 1);
+    deletePost(postId) {
+      this.posts = this.posts.filter((post) => post.id !== postId);
     },
 
     addPost() {
@@ -103,10 +145,21 @@ export default {
           content: this.newPost.content,
           likes: 0,
           isEditing: false,
+          isFavorite: false,
+          createdAt: new Date(),
         });
         this.newPost.title = "";
         this.newPost.content = "";
       }
+    },
+
+    toggleFavorite(postId) {
+      const post = this.posts.find((p) => p.id === postId);
+      if (post) post.isFavorite = !post.isFavorite;
+    },
+
+    toggleSort() {
+      this.sortByLikes = !this.sortByLikes;
     },
   },
 };
@@ -133,6 +186,52 @@ body {
   padding: 20px;
   background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
   min-height: 100vh;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #2c2c2c;
+  color: #e0e0e0;
+  font-size: 1em;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #bb86fc;
+}
+
+.sort-button {
+  background-color: #03dac6;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+}
+
+.sort-button:hover {
+  background-color: #00c4b4;
+  box-shadow: 0 0 15px rgba(0, 196, 180, 0.8);
+}
+
+.sort-button:active {
+  background-color: #00a896;
+  transform: scale(0.95);
 }
 
 .add-post {
@@ -230,6 +329,7 @@ body {
 }
 
 .like-button,
+.favorite-button,
 .edit-button,
 .delete-button {
   border: none;
@@ -254,6 +354,22 @@ body {
 
 .like-button:active {
   background-color: #3700b3;
+  transform: scale(0.95);
+}
+
+.favorite-button {
+  background-color: #ffd700;
+  color: black;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.favorite-button:hover {
+  background-color: #ffc800;
+  box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+}
+
+.favorite-button:active {
+  background-color: #e6b800;
   transform: scale(0.95);
 }
 
