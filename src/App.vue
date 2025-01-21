@@ -165,7 +165,7 @@ export default {
     paginatedPosts() {
       const start = (this.currentPage - 1) * this.postsPerPage;
       const end = start + this.postsPerPage;
-      return this.filteredPosts.slice(start, end);
+      return this.highlightedPosts.slice(start, end);
     },
 
     totalPages() {
@@ -384,6 +384,7 @@ body.light-mode .post {
   max-width: 600px;
   width: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
 }
 
 .post:hover {
