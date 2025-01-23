@@ -32,23 +32,19 @@
       </button>
     </div>
 
-    <!-- Модальное окно для подтверждения удаления -->
-    <div v-if="showDeleteModal" class="modal-overlay">
-      <div class="modal">
-        <p>Are you sure you want to delete this post?</p>
-        <button @click="confirmDelete" class="modal-confirm">
-          Yes, delete
-        </button>
-        <button @click="showDeleteModal = false" class="modal-cancel">
-          Cancel
-        </button>
-      </div>
-    </div>
+    <DeleteModal
+      v-if="showDeleteModal"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
+import DeleteModal from "./DeleteModal.vue";
+
 export default {
+  components: { DeleteModal },
   props: {
     post: Object,
   },

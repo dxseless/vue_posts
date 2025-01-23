@@ -32,133 +32,124 @@
 </template>
 
 <script>
+import { ref, computed } from "vue";
 import Controls from "./components/Controls.vue";
 import AddPost from "./components/AddPost.vue";
 import PostList from "./components/PostList.vue";
+import { usePosts } from "./composables/usePosts";
 
 export default {
   components: { Controls, AddPost, PostList },
-  data() {
-    return {
-      posts: [
-        {
-          id: 1,
-          title: "Why Vue.js is Awesome",
-          content:
-            "Vue.js is a progressive JavaScript framework that is approachable, versatile, and performant. It allows developers to build user interfaces and single-page applications with ease. Vue's reactivity system and component-based architecture make it a joy to work with.",
-          likes: 0,
-          isEditing: false,
-          isFavorite: false,
-          createdAt: new Date(),
-          tags: ["Vue", "Frontend"],
-        },
-        {
-          id: 2,
-          title: "JavaScript: The Language of the Web",
-          content:
-            "JavaScript is the backbone of modern web development. It enables interactive web pages and is used for both front-end and back-end development. With the rise of frameworks like Vue, React, and Angular, JavaScript has become even more powerful.",
-          likes: 0,
-          isEditing: false,
-          isFavorite: false,
-          createdAt: new Date(),
-          tags: ["JavaScript", "Web"],
-        },
-        {
-          id: 3,
-          title: "Web Development in 2023",
-          content:
-            "Web development continues to evolve rapidly. Trends like serverless architecture, Jamstack, and progressive web apps (PWAs) are shaping the future. Frameworks like Vue.js make it easier than ever to build modern, scalable applications.",
-          likes: 0,
-          isEditing: false,
-          isFavorite: false,
-          createdAt: new Date(),
-          tags: ["Web", "Trends"],
-        },
-      ],
-      newPost: {
-        title: "",
-        content: "",
-        tags: "",
+  setup() {
+    const initialPosts = [
+      {
+        id: 1,
+        title: "Why Vue.js is Awesome",
+        content:
+          "Vue.js is a progressive JavaScript framework that is approachable, versatile, and performant. It allows developers to build user interfaces and single-page applications with ease. Vue's reactivity system and component-based architecture make it a joy to work with.",
+        likes: 0,
+        isEditing: false,
+        isFavorite: false,
+        createdAt: new Date(),
+        tags: ["Vue", "Frontend"],
       },
-      nextPostId: 4,
-      searchQuery: "",
-      sortByLikes: false,
-      currentPage: 1,
-      postsPerPage: 5,
-      isDarkMode: true,
+      {
+        id: 2,
+        title: "JavaScript: The Language of the Web",
+        content:
+          "JavaScript is the backbone of modern web development. It enables interactive web pages and is used for both front-end and back-end development. With the rise of frameworks like Vue, React, and Angular, JavaScript has become even more powerful.",
+        likes: 0,
+        isEditing: false,
+        isFavorite: false,
+        createdAt: new Date(),
+        tags: ["JavaScript", "Web"],
+      },
+      {
+        id: 3,
+        title: "Web Development in 2023",
+        content:
+          "Web development continues to evolve rapidly. Trends like serverless architecture, Jamstack, and progressive web apps (PWAs) are shaping the future. Frameworks like Vue.js make it easier than ever to build modern, scalable applications.",
+        likes: 0,
+        isEditing: false,
+        isFavorite: false,
+        createdAt: new Date(),
+        tags: ["Web", "Trends"],
+      },
+    ];
+
+    const {
+      posts,
+      searchQuery,
+      sortByLikes,
+      filteredPosts,
+      addPost,
+      deletePost,
+    } = usePosts(initialPosts);
+
+    const currentPage = ref(1);
+    const postsPerPage = 5;
+    const isDarkMode = ref(true);
+
+    const paginatedPosts = computed(() => {
+      const start = (currentPage.value - 1) * postsPerPage;
+      const end = start + postsPerPage;
+      return filteredPosts.value.slice(start, end);
+    });
+
+    const totalPages = computed(() => {
+      return Math.ceil(filteredPosts.value.length / postsPerPage);
+    });
+
+    const nextPage = () => {
+      if (currentPage.value < totalPages.value) currentPage.value++;
     };
-  },
-  computed: {
-    filteredPosts() {
-      let posts = this.posts.filter(
-        (post) =>
-          post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          post.content.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          post.tags.some((tag) =>
-            tag.toLowerCase().includes(this.searchQuery.toLowerCase())
-          )
-      );
 
-      if (this.sortByLikes) {
-        posts.sort((a, b) => b.likes - a.likes);
-      } else {
-        posts.sort((a, b) => b.createdAt - a.createdAt);
-      }
+    const prevPage = () => {
+      if (currentPage.value > 1) currentPage.value--;
+    };
 
-      return posts;
-    },
-    paginatedPosts() {
-      const start = (this.currentPage - 1) * this.postsPerPage;
-      const end = start + this.postsPerPage;
-      return this.filteredPosts.slice(start, end);
-    },
-    totalPages() {
-      return Math.ceil(this.filteredPosts.length / this.postsPerPage);
-    },
-  },
-  methods: {
-    addLike(postId) {
-      const post = this.posts.find((p) => p.id === postId);
+    const toggleSort = () => {
+      sortByLikes.value = !sortByLikes.value;
+    };
+
+    const toggleTheme = () => {
+      isDarkMode.value = !isDarkMode.value;
+      document.body.classList.toggle("light-mode", !isDarkMode.value);
+    };
+
+    const addLike = (postId) => {
+      const post = posts.value.find((p) => p.id === postId);
       if (post) post.likes++;
-    },
-    toggleEdit(postId) {
-      const post = this.posts.find((p) => p.id === postId);
+    };
+
+    const toggleEdit = (postId) => {
+      const post = posts.value.find((p) => p.id === postId);
       if (post) post.isEditing = !post.isEditing;
-    },
-    deletePost(postId) {
-      this.posts = this.posts.filter((post) => post.id !== postId);
-    },
-    addPost(newPost) {
-      if (newPost.title.trim() && newPost.content.trim()) {
-        this.posts.push({
-          id: this.nextPostId++,
-          title: newPost.title,
-          content: newPost.content,
-          likes: 0,
-          isEditing: false,
-          isFavorite: false,
-          createdAt: new Date(),
-          tags: newPost.tags.split(",").map((tag) => tag.trim()),
-        });
-      }
-    },
-    toggleFavorite(postId) {
-      const post = this.posts.find((p) => p.id === postId);
+    };
+
+    const toggleFavorite = (postId) => {
+      const post = posts.value.find((p) => p.id === postId);
       if (post) post.isFavorite = !post.isFavorite;
-    },
-    toggleSort() {
-      this.sortByLikes = !this.sortByLikes;
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++;
-    },
-    prevPage() {
-      if (this.currentPage > 1) this.currentPage--;
-    },
-    toggleTheme() {
-      this.isDarkMode = !this.isDarkMode;
-      document.body.classList.toggle("light-mode", !this.isDarkMode);
-    },
+    };
+
+    return {
+      posts,
+      searchQuery,
+      sortByLikes,
+      isDarkMode,
+      paginatedPosts,
+      currentPage,
+      totalPages,
+      addPost,
+      deletePost,
+      nextPage,
+      prevPage,
+      toggleSort,
+      toggleTheme,
+      addLike,
+      toggleEdit,
+      toggleFavorite,
+    };
   },
 };
 </script>
