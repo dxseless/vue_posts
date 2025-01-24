@@ -3,16 +3,25 @@ import { ref, computed } from "vue";
 export function usePosts(initialPosts) {
   const posts = ref(initialPosts);
   const searchQuery = ref("");
+  const selectedTag = ref("");
   const sortByLikes = ref(false);
 
+  // Получаем уникальные теги из всех постов
+  const tags = computed(() => {
+    const allTags = posts.value.flatMap((post) => post.tags);
+    return [...new Set(allTags)];
+  });
+
+  // Фильтрация постов
   const filteredPosts = computed(() => {
     let filtered = posts.value.filter(
       (post) =>
-        post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        post.tags.some((tag) =>
-          tag.toLowerCase().includes(searchQuery.value.toLowerCase())
-        )
+        (post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          post.tags.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.value.toLowerCase())
+          )) &&
+        (selectedTag.value ? post.tags.includes(selectedTag.value) : true)
     );
 
     if (sortByLikes.value) {
@@ -45,6 +54,8 @@ export function usePosts(initialPosts) {
   return {
     posts,
     searchQuery,
+    selectedTag,
+    tags,
     sortByLikes,
     filteredPosts,
     addPost,

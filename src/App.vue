@@ -2,9 +2,12 @@
   <div class="post-container">
     <Controls
       :searchQuery="searchQuery"
+      :selectedTag="selectedTag"
+      :tags="tags"
       :sortByLikes="sortByLikes"
       :isDarkMode="isDarkMode"
       @update:searchQuery="searchQuery = $event"
+      @update:selectedTag="selectedTag = $event"
       @toggleSort="toggleSort"
       @toggleTheme="toggleTheme"
     />
@@ -80,6 +83,8 @@ export default {
     const {
       posts,
       searchQuery,
+      selectedTag,
+      tags,
       sortByLikes,
       filteredPosts,
       addPost,
@@ -135,6 +140,8 @@ export default {
     return {
       posts,
       searchQuery,
+      selectedTag,
+      tags,
       sortByLikes,
       isDarkMode,
       paginatedPosts,
@@ -169,12 +176,12 @@ body {
 
 body.light-mode {
   background-color: #f5f5f5;
-  color: #333;
+  color: #000000;
 }
 
 body.light-mode .post {
   background-color: #fff;
-  color: #333;
+  color: #000000;
   border-color: #ddd;
 }
 
@@ -214,7 +221,7 @@ body.light-mode .post {
 .sort-button,
 .theme-button {
   background-color: #03dac6;
-  color: black;
+  color: #000;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
@@ -246,7 +253,7 @@ body.light-mode .post {
   padding: 20px;
   background-color: #1a1a1a;
   border-radius: 12px;
-  border: 1px solid #333;
+  border: 1px solid #000000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
@@ -290,7 +297,7 @@ body.light-mode .post {
 .post {
   background-color: #1a1a1a;
   border-radius: 12px;
-  border: 1px solid #333;
+  border: 1px solid #000000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   padding: 20px;
   max-width: 600px;
@@ -380,7 +387,7 @@ body.light-mode .post {
 
 .favorite-button {
   background-color: #ffd700;
-  color: black;
+  color: #000;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
@@ -396,7 +403,7 @@ body.light-mode .post {
 
 .edit-button {
   background-color: #03dac6;
-  color: black;
+  color: #000;
   box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
 }
 
@@ -452,7 +459,7 @@ body.light-mode .post {
 
 .pagination button {
   background-color: #03dac6;
-  color: black;
+  color: #000;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
@@ -494,5 +501,6 @@ body.light-mode .post {
   border: 3px solid #af10e4;
   border-radius: 8px;
   font-weight: bold;
+  color: #fff;
 }
 </style>
