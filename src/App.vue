@@ -162,27 +162,33 @@ export default {
 </script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --background-dark: #0a0a0a;
+  --text-dark: #e0e0e0;
+  --background-light: #f5f5f5;
+  --text-light: #333;
+  --primary-color: #6200ea;
+  --secondary-color: #03dac6;
+  --accent-color: #bb86fc;
+  --error-color: #cf6679;
+  --warning-color: #ffd700;
+  --border-dark: #333;
+  --border-light: #ddd;
+  --neon-primary: #bb86fc;
+  --neon-secondary: #03dac6;
+  --neon-accent: #ff00ff;
 }
 
 body {
-  background-color: #0a0a0a;
-  color: #e0e0e0;
+  background-color: var(--background-dark);
+  color: var(--text-dark);
   font-family: "Arial", sans-serif;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 body.light-mode {
-  background-color: #f5f5f5;
-  color: #000000;
-}
-
-body.light-mode .post {
-  background-color: #fff;
-  color: #000000;
-  border-color: #ddd;
+  background-color: var(--background-light);
+  color: var(--text-light);
 }
 
 .post-container {
@@ -191,8 +197,12 @@ body.light-mode .post {
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+  background: linear-gradient(145deg, var(--background-dark), #0a0a0a);
   min-height: 100vh;
+}
+
+body.light-mode .post-container {
+  background: linear-gradient(145deg, var(--background-light), #f5f5f5);
 }
 
 .controls {
@@ -203,33 +213,48 @@ body.light-mode .post {
   margin-bottom: 20px;
 }
 
-.search-input {
+.search-input,
+.tag-select {
   flex: 1;
   padding: 10px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-dark);
   border-radius: 8px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
+  background-color: var(--background-dark);
+  color: var(--text-dark);
   font-size: 1em;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
 }
 
-.search-input:focus {
+body.light-mode .search-input,
+body.light-mode .tag-select {
+  border-color: var(--border-light);
+  background-color: var(--background-light);
+  color: var(--text-light);
+}
+
+.search-input:focus,
+.tag-select:focus {
   outline: none;
-  border-color: #bb86fc;
+  border-color: var(--neon-primary);
+  box-shadow: 0 0 10px var(--neon-primary);
 }
 
 .sort-button,
 .theme-button {
-  background-color: #03dac6;
-  color: #000;
+  background-color: var(--secondary-color);
+  color: var(--text-light);
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
   box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
+}
+
+body.light-mode .sort-button,
+body.light-mode .theme-button {
+  color: var(--text-light);
 }
 
 .sort-button:hover,
@@ -251,42 +276,59 @@ body.light-mode .post {
   width: 100%;
   max-width: 600px;
   padding: 20px;
-  background-color: #1a1a1a;
+  background-color: var(--background-dark);
   border-radius: 12px;
-  border: 1px solid #000000;
+  border: 1px solid var(--border-dark);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.3s;
+}
+
+body.light-mode .add-post {
+  background-color: var(--background-light);
+  border-color: var(--border-light);
+}
+
+.add-post:hover {
+  box-shadow: 0 0 20px var(--neon-primary);
 }
 
 .input-field {
   padding: 10px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-dark);
   border-radius: 8px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
+  background-color: var(--background-dark);
+  color: var(--text-dark);
   font-size: 1em;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+body.light-mode .input-field {
+  border-color: var(--border-light);
+  background-color: var(--background-light);
+  color: var(--text-light);
 }
 
 .input-field:focus {
   outline: none;
-  border-color: #bb86fc;
+  border-color: var(--neon-primary);
+  box-shadow: 0 0 10px var(--neon-primary);
 }
 
 .add-button {
-  background-color: #6200ea;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
   box-shadow: 0 0 10px rgba(98, 0, 234, 0.5);
 }
 
 .add-button:hover {
   background-color: #7c4dff;
-  box-shadow: 0 0 15px rgba(124, 77, 255, 0.8);
+  box-shadow: 0 0 20px var(--neon-primary);
 }
 
 .add-button:active {
@@ -295,20 +337,26 @@ body.light-mode .post {
 }
 
 .post {
-  background-color: #1a1a1a;
+  background-color: var(--background-dark);
   border-radius: 12px;
-  border: 1px solid #000000;
+  border: 1px solid var(--border-dark);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   padding: 20px;
   max-width: 600px;
   width: 100%;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s, border-color 0.3s;
   margin-bottom: 20px;
+}
+
+body.light-mode .post {
+  background-color: var(--background-light);
+  border-color: var(--border-light);
+  color: var(--text-light);
 }
 
 .post:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(106, 90, 205, 0.6);
+  box-shadow: 0 0 20px var(--neon-primary);
 }
 
 .post-header {
@@ -317,9 +365,25 @@ body.light-mode .post {
 
 .post-title {
   font-size: 1.5em;
-  color: #bb86fc;
+  color: var(--neon-primary);
   margin-left: 10px;
-  text-shadow: 0 0 5px #bb86fc, 0 0 10px #bb86fc;
+  text-shadow: 0 0 5px var(--neon-primary), 0 0 10px var(--neon-primary);
+  animation: neonGlow 1.5s infinite alternate;
+}
+
+@keyframes neonGlow {
+  from {
+    text-shadow: 0 0 5px var(--neon-primary), 0 0 10px var(--neon-primary);
+  }
+  to {
+    text-shadow: 0 0 10px var(--neon-primary), 0 0 20px var(--neon-primary);
+  }
+}
+
+body.light-mode .post-title {
+  color: var(--primary-color);
+  text-shadow: none;
+  animation: none;
 }
 
 .post-content {
@@ -329,8 +393,12 @@ body.light-mode .post {
 .post-text {
   font-size: 1em;
   line-height: 1.6;
-  color: #e0e0e0;
+  color: var(--text-dark);
   margin-top: 10px;
+}
+
+body.light-mode .post-text {
+  color: var(--text-light);
 }
 
 .tags {
@@ -340,14 +408,21 @@ body.light-mode .post {
 }
 
 .tag {
-  background-color: #6200ea;
+  background-color: var(--primary-color);
   color: white;
-  padding: 10px 15px;
+  padding: 5px 10px;
   border-radius: 12px;
   font-size: 0.8em;
-  margin-bottom: 15px;
-  font-weight: bold;
-  font-size: 0.8em;
+  transition: box-shadow 0.3s;
+}
+
+.tag:hover {
+  box-shadow: 0 0 10px var(--neon-primary);
+}
+
+body.light-mode .tag {
+  background-color: var(--secondary-color);
+  color: black;
 }
 
 .post-footer {
@@ -365,19 +440,18 @@ body.light-mode .post {
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
 .like-button {
-  background-color: #6200ea;
+  background-color: var(--primary-color);
   color: white;
   box-shadow: 0 0 10px rgba(98, 0, 234, 0.5);
 }
 
 .like-button:hover {
   background-color: #7c4dff;
-  box-shadow: 0 0 15px rgba(124, 77, 255, 0.8);
+  box-shadow: 0 0 20px var(--neon-primary);
 }
 
 .like-button:active {
@@ -386,14 +460,14 @@ body.light-mode .post {
 }
 
 .favorite-button {
-  background-color: #ffd700;
-  color: #000;
+  background-color: var(--warning-color);
+  color: black;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .favorite-button:hover {
   background-color: #ffc800;
-  box-shadow: 0 0 15px rgba(255, 200, 0, 0.8);
+  box-shadow: 0 0 20px var(--neon-accent);
 }
 
 .favorite-button:active {
@@ -402,14 +476,14 @@ body.light-mode .post {
 }
 
 .edit-button {
-  background-color: #03dac6;
-  color: #000;
+  background-color: var(--secondary-color);
+  color: black;
   box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
 }
 
 .edit-button:hover {
   background-color: #00c4b4;
-  box-shadow: 0 0 15px rgba(0, 196, 180, 0.8);
+  box-shadow: 0 0 20px var(--neon-secondary);
 }
 
 .edit-button:active {
@@ -418,14 +492,14 @@ body.light-mode .post {
 }
 
 .delete-button {
-  background-color: #cf6679;
+  background-color: var(--error-color);
   color: white;
   box-shadow: 0 0 10px rgba(207, 102, 121, 0.5);
 }
 
 .delete-button:hover {
   background-color: #b00020;
-  box-shadow: 0 0 15px rgba(176, 0, 32, 0.8);
+  box-shadow: 0 0 20px var(--neon-accent);
 }
 
 .delete-button:active {
@@ -437,17 +511,26 @@ body.light-mode .post {
 .edit-textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-dark);
   border-radius: 8px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
+  background-color: var(--background-dark);
+  color: var(--text-dark);
   font-size: 1em;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+body.light-mode .edit-input,
+body.light-mode .edit-textarea {
+  border-color: var(--border-light);
+  background-color: var(--background-light);
+  color: var(--text-light);
 }
 
 .edit-input:focus,
 .edit-textarea:focus {
   outline: none;
-  border-color: #bb86fc;
+  border-color: var(--neon-primary);
+  box-shadow: 0 0 10px var(--neon-primary);
 }
 
 .pagination {
@@ -458,21 +541,20 @@ body.light-mode .post {
 }
 
 .pagination button {
-  background-color: #03dac6;
-  color: #000;
+  background-color: var(--secondary-color);
+  color: black;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
   box-shadow: 0 0 10px rgba(3, 218, 198, 0.5);
 }
 
 .pagination button:hover {
   background-color: #00c4b4;
-  box-shadow: 0 0 15px rgba(0, 196, 180, 0.8);
+  box-shadow: 0 0 20px var(--neon-secondary);
 }
 
 .pagination button:active {
@@ -498,9 +580,15 @@ body.light-mode .post {
 
 .paginate-counter {
   padding: 8px 15px;
-  border: 3px solid #af10e4;
+  border: 3px solid var(--neon-primary);
   border-radius: 8px;
   font-weight: bold;
-  color: #fff;
+  color: var(--text-dark);
+  animation: neonGlow 1.5s infinite alternate;
+}
+
+body.light-mode .paginate-counter {
+  color: var(--text-light);
+  animation: none;
 }
 </style>
