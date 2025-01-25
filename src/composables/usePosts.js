@@ -5,7 +5,7 @@ export function usePosts(initialPosts) {
   const searchQuery = ref("");
   const selectedTag = ref("");
   const sortByLikes = ref(false);
-  const sortByDate = ref(false); 
+  const sortByDate = ref(false);
 
   const tags = computed(() => {
     const allTags = posts.value.flatMap((post) => post.tags);
@@ -24,9 +24,9 @@ export function usePosts(initialPosts) {
     );
 
     if (sortByLikes.value) {
-      filtered.sort((a, b) => b.likes - a.likes); 
+      filtered.sort((a, b) => b.likes - a.likes);
     } else if (sortByDate.value) {
-      filtered.sort((a, b) => b.createdAt - a.createdAt); 
+      filtered.sort((a, b) => b.createdAt - a.createdAt);
     }
 
     return filtered;
@@ -52,12 +52,12 @@ export function usePosts(initialPosts) {
 
   const toggleSortByLikes = () => {
     sortByLikes.value = !sortByLikes.value;
-    sortByDate.value = false; 
+    sortByDate.value = false;
   };
 
   const toggleSortByDate = () => {
     sortByDate.value = !sortByDate.value;
-    sortByLikes.value = false; 
+    sortByLikes.value = false;
   };
 
   return {

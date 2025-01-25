@@ -17,22 +17,12 @@
     <AddPost @addPost="addPost" />
 
     <PostList
-      :posts="paginatedPosts"
+      :posts="filteredPosts"
       @addLike="addLike"
       @toggleFavorite="toggleFavorite"
       @toggleEdit="toggleEdit"
       @deletePost="deletePost"
     />
-
-    <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">← Назад</button>
-      <span class="paginate-counter"
-        >Страница {{ currentPage }} из {{ totalPages }}</span
-      >
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        Вперед →
-      </button>
-    </div>
   </div>
 </template>
 
@@ -96,27 +86,7 @@ export default {
       toggleSortByDate,
     } = usePosts(initialPosts);
 
-    const currentPage = ref(1);
-    const postsPerPage = 5;
     const isDarkMode = ref(true);
-
-    const paginatedPosts = computed(() => {
-      const start = (currentPage.value - 1) * postsPerPage;
-      const end = start + postsPerPage;
-      return filteredPosts.value.slice(start, end);
-    });
-
-    const totalPages = computed(() => {
-      return Math.ceil(filteredPosts.value.length / postsPerPage);
-    });
-
-    const nextPage = () => {
-      if (currentPage.value < totalPages.value) currentPage.value++;
-    };
-
-    const prevPage = () => {
-      if (currentPage.value > 1) currentPage.value--;
-    };
 
     const toggleTheme = () => {
       isDarkMode.value = !isDarkMode.value;
@@ -146,13 +116,9 @@ export default {
       sortByLikes,
       sortByDate,
       isDarkMode,
-      paginatedPosts,
-      currentPage,
-      totalPages,
+      filteredPosts,
       addPost,
       deletePost,
-      nextPage,
-      prevPage,
       toggleSortByLikes,
       toggleSortByDate,
       toggleTheme,
