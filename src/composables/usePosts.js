@@ -5,14 +5,13 @@ export function usePosts(initialPosts) {
   const searchQuery = ref("");
   const selectedTag = ref("");
   const sortByLikes = ref(false);
+  const sortByDate = ref(false); 
 
-  // Получаем уникальные теги из всех постов
   const tags = computed(() => {
     const allTags = posts.value.flatMap((post) => post.tags);
     return [...new Set(allTags)];
   });
 
-  // Фильтрация постов
   const filteredPosts = computed(() => {
     let filtered = posts.value.filter(
       (post) =>
@@ -25,9 +24,9 @@ export function usePosts(initialPosts) {
     );
 
     if (sortByLikes.value) {
-      filtered.sort((a, b) => b.likes - a.likes);
-    } else {
-      filtered.sort((a, b) => b.createdAt - a.createdAt);
+      filtered.sort((a, b) => b.likes - a.likes); 
+    } else if (sortByDate.value) {
+      filtered.sort((a, b) => b.createdAt - a.createdAt); 
     }
 
     return filtered;
@@ -51,14 +50,27 @@ export function usePosts(initialPosts) {
     posts.value = posts.value.filter((post) => post.id !== postId);
   };
 
+  const toggleSortByLikes = () => {
+    sortByLikes.value = !sortByLikes.value;
+    sortByDate.value = false; 
+  };
+
+  const toggleSortByDate = () => {
+    sortByDate.value = !sortByDate.value;
+    sortByLikes.value = false; 
+  };
+
   return {
     posts,
     searchQuery,
     selectedTag,
     tags,
     sortByLikes,
+    sortByDate,
     filteredPosts,
     addPost,
     deletePost,
+    toggleSortByLikes,
+    toggleSortByDate,
   };
 }
