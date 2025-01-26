@@ -14,7 +14,7 @@
       <option value="">All Tags</option>
       <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
     </select>
-    <button @click="$emit('toggleSort')" class="sort-button" title="Sort by Likes">
+    <button @click="$emit('toggleSortByLikes')" class="sort-button" title="Sort by Likes">
       {{ sortByLikes ? "📅 Sort by Date" : "❤️ Sort by Likes" }}
     </button>
     <button @click="$emit('toggleTheme')" class="theme-button" title="Toggle Theme">

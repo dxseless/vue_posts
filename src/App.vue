@@ -8,7 +8,7 @@
       :isDarkMode="isDarkMode"
       @update:searchQuery="searchQuery = $event"
       @update:selectedTag="selectedTag = $event"
-      @toggleSort="toggleSort"
+      @toggleSortByLikes="toggleSortByLikes"
       @toggleTheme="toggleTheme"
     />
 
@@ -53,7 +53,7 @@ export default {
         likes: 0,
         isEditing: false,
         isFavorite: false,
-        createdAt: new Date(),
+        createdAt: new Date("2023-10-01"),
         tags: ["Vue", "Frontend"],
       },
       {
@@ -64,7 +64,7 @@ export default {
         likes: 0,
         isEditing: false,
         isFavorite: false,
-        createdAt: new Date(),
+        createdAt: new Date("2023-09-15"),
         tags: ["JavaScript", "Web"],
       },
       {
@@ -75,7 +75,7 @@ export default {
         likes: 0,
         isEditing: false,
         isFavorite: false,
-        createdAt: new Date(),
+        createdAt: new Date("2023-10-10"),
         tags: ["Web", "Trends"],
       },
     ];
@@ -86,9 +86,12 @@ export default {
       selectedTag,
       tags,
       sortByLikes,
+      sortByDate,
       filteredPosts,
       addPost,
       deletePost,
+      toggleSortByLikes,
+      toggleSortByDate,
     } = usePosts(initialPosts);
 
     const currentPage = ref(1);
@@ -111,10 +114,6 @@ export default {
 
     const prevPage = () => {
       if (currentPage.value > 1) currentPage.value--;
-    };
-
-    const toggleSort = () => {
-      sortByLikes.value = !sortByLikes.value;
     };
 
     const toggleTheme = () => {
@@ -143,6 +142,7 @@ export default {
       selectedTag,
       tags,
       sortByLikes,
+      sortByDate,
       isDarkMode,
       paginatedPosts,
       currentPage,
@@ -151,7 +151,8 @@ export default {
       deletePost,
       nextPage,
       prevPage,
-      toggleSort,
+      toggleSortByLikes,
+      toggleSortByDate,
       toggleTheme,
       addLike,
       toggleEdit,
